@@ -14,11 +14,11 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
                       database_name="ContosoDB",
                       container_name="LoanAgreements",
                       connection="COSMOS_CONNECTION_STRING")
-def ProcessLoanAgreements(myblob: func.InputStream, outputDocument: func.Out[func.Document]):  
+def ProcessLoanAgreements(myblob: func.InputStream, outputDocument: func.Out[func.Document]):
     """
     Triggered when a new blob is added to the 'loanagreements' container.
     Processes the blob and saves the results to Cosmos DB if it is a JSON file.
-    
+
     Parameters:
     myblob (func.InputStream): The input blob stream.
     outputDocument (func.Out[func.Document]): The output document for Cosmos DB.
@@ -34,16 +34,16 @@ def ProcessLoanAgreements(myblob: func.InputStream, outputDocument: func.Out[fun
         # Read the blob data
         blob_data = myblob.read()
         data = json.loads(blob_data)
-        
+
         # Model the paystubs data
         document = model_loanagreements(data)
-        
+
         # Save the analysis results to Cosmos DB
         outputDocument.set(func.Document.from_dict(document))
-        return 
-    
+        return
+
     # Generate SAS URL for the blob
-    sas_url = generate_sas_url(blob_service_client, container_name, file_name)   
+    sas_url = generate_sas_url(blob_service_client, container_name, file_name)
 
     # Analyze the layout of the file using the SAS URL
     analysis_results = analyze_layout(sas_url=sas_url)
@@ -52,7 +52,7 @@ def ProcessLoanAgreements(myblob: func.InputStream, outputDocument: func.Out[fun
     save_analysis_results(blob_service_client, container_name, file_root, analysis_results)
 
 @app.blob_trigger(arg_name="myblob", path="data/loanform/{name}",
-                               connection="STORAGE_CONNECTION_STRING") 
+                               connection="STORAGE_CONNECTION_STRING")
 @app.cosmos_db_output(arg_name="outputDocument",
                       database_name="ContosoDB",
                       container_name="LoanForms",
@@ -61,14 +61,14 @@ def ProcessLoanForms(myblob: func.InputStream, outputDocument: func.Out[func.Doc
     """
     Triggered when a new blob is added to the 'loanforms' container.
     Processes the blob and saves the results to Cosmos DB if it is a JSON file.
-    
+
     Parameters:
     myblob (func.InputStream): The input blob stream.
     outputDocument (func.Out[func.Document]): The output document for Cosmos DB.
     """
-    container_name = 'data/loanforms'
+    container_name = 'data/loanform'
     blob_service_client = get_blob_service_client()
-    
+
     # Extract file name and root from the blob name
     file_name, file_root = get_file_names(myblob.name)
 
@@ -77,16 +77,16 @@ def ProcessLoanForms(myblob: func.InputStream, outputDocument: func.Out[func.Doc
         # Read the blob data
         blob_data = myblob.read()
         data = json.loads(blob_data)
-        
+
         # Model the paystubs data
         document = model_loanforms(data)
-        
+
         # Save the analysis results to Cosmos DB
         outputDocument.set(func.Document.from_dict(document))
         return
-    
+
     # Generate SAS URL for the blob
-    sas_url = generate_sas_url(blob_service_client, container_name, file_name)   
+    sas_url = generate_sas_url(blob_service_client, container_name, file_name)
 
     # Analyze the layout of the file using the SAS URL
     analysis_results = analyze_layout(sas_url=sas_url)
@@ -104,14 +104,14 @@ def ProcessPayStubs(myblob: func.InputStream, outputDocument: func.Out[func.Docu
     """
     Triggered when a new blob is added to the 'paystubs' container.
     Processes the blob and saves the results to Cosmos DB if it is a JSON file.
-    
+
     Parameters:
     myblob (func.InputStream): The input blob stream.
     outputDocument (func.Out[func.Document]): The output document for Cosmos DB.
     """
     container_name = 'data/paystubs'
     blob_service_client = get_blob_service_client()
-    
+
     # Extract file name and root from the blob name
     file_name, file_root = get_file_names(myblob.name)
 
@@ -120,16 +120,16 @@ def ProcessPayStubs(myblob: func.InputStream, outputDocument: func.Out[func.Docu
         # Read the blob data
         blob_data = myblob.read()
         data = json.loads(blob_data)
-        
+
         # Model the paystubs data
         document = model_paystubs(data)
-        
+
         # Save the analysis results to Cosmos DB
         outputDocument.set(func.Document.from_dict(document))
         return
-    
+
     # Generate SAS URL for the blob
-    sas_url = generate_sas_url(blob_service_client, container_name, file_name)   
+    sas_url = generate_sas_url(blob_service_client, container_name, file_name)
 
     # Analyze the layout of the file using the SAS URL
     analysis_results = analyze_layout(sas_url=sas_url)
